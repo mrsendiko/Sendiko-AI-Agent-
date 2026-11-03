@@ -1,0 +1,41 @@
+name: SENDIKO AI AGENT APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Ekstrak aplikasi
+        run: |
+          unzip -o aplikasi.zip -d /tmp/sendiko
+          if [ -d /tmp/sendiko/app ]; then
+            cp -r /tmp/sendiko/app .
+          else
+            mkdir -p app
+            cp -r /tmp/sendiko/* app/
+          fi
+
+      - name: Build APK
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Jalankan build
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SENDIKO-APK
+          path: app/build/outputs/apk/debug/*.apk
